@@ -5,14 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && tsc -p server/tsconfig.json",
     "lint": "eslint .",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
     "server": "nodemon --exec tsx server/server.ts",
     "dev:all": "concurrently \"npm run dev\" \"npm run server\"",
-    "start": "vite preview --port 8080"
-},
+    "start": "node server/dist/server.js"
+  },
+
   "dependencies": {
     "@reduxjs/toolkit": "^2.9.0",
     "@supabase/supabase-js": "^2.57.4",
