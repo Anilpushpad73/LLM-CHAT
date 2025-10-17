@@ -1,9 +1,9 @@
 
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store/store';
-import { Plus, MessageSquare, Trash2, Building2 } from 'lucide-react';
+import { Plus, MessageSquare, Trash2, Building2, Pen } from 'lucide-react';
 import api from '../../services/api';
-import { addChat, setCurrentChat, removeChat, setMessages } from '../../store/slices/chatSlice';
+import { addChat, setCurrentChat, removeChat, setMessages, updateChatTitle } from '../../store/slices/chatSlice';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -37,6 +37,19 @@ const Sidebar = ({ isOpen, onOpenOrgModal }: SidebarProps) => {
       console.error('Error loading messages:', error);
     }
   };
+    const handlechangetitle = async (chatId: string, e: React.MouseEvent) => {
+      e.stopPropagation(); 
+      const newTitle = prompt("Enter new chat title:");
+      if (!newTitle || newTitle.trim() === "") return;
+
+      try {
+        const response = await api.put(`/chat/${chatId}/title`, { title: newTitle });
+        dispatch(updateChatTitle({ chatId, title: newTitle }));
+        console.log("Chat title updated:", response.data);
+      } catch (error) {
+        console.error("Error updating chat title:", error);
+      }
+    };
 
   const handleDeleteChat = async (chatId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -53,7 +66,7 @@ const Sidebar = ({ isOpen, onOpenOrgModal }: SidebarProps) => {
   if (!isOpen) return null;
 
   return (
-    <div className="w-64 bg-slate-900 text-white flex flex-col h-screen">
+    <div className="w-64 bg-slate-900 text-white flex flex-col h-screen fixed top-0 left-0 border-r border-slate-700 z-40">
       <div className="p-4 border-b border-slate-700">
         <button
           onClick={handleNewChat}
@@ -90,6 +103,12 @@ const Sidebar = ({ isOpen, onOpenOrgModal }: SidebarProps) => {
                     className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-600 rounded transition"
                   >
                     <Trash2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={(e) => handlechangetitle(chat._id, e)}
+                    className="p-2 hover:bg-gray-200 rounded"
+                  >
+                    <Pen className="w-4 h-4" />
                   </button>
                 </div>
               ))}

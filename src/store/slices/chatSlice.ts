@@ -67,6 +67,7 @@ const chatSlice = createSlice({
         chat.title = action.payload.title;
       }
     },
+    
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;
     },

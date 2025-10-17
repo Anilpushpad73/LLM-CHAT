@@ -16,7 +16,7 @@ const ChatInterface = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showOrgModal, setShowOrgModal] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const dispatch = useDispatch();
+  const dispatch = useDispatch(); 
   const user = useSelector((state: RootState) => state.auth.user);
 
   useEffect(() => {
@@ -72,6 +72,7 @@ const ChatInterface = () => {
         <TopBar
           onToggleNotifications={() => setShowNotifications(!showNotifications)}
           onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+          isSidebarOpen={sidebarOpen}
         />
 
         <ChatArea />

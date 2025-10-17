@@ -82,8 +82,9 @@ const ChatArea = () => {
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-white">
-      <div className="flex-1 overflow-y-auto p-6">
+    <div className="flex-1 flex flex-col bg-white relative">
+      {/* Chat messages scrollable area */}
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4">
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
@@ -96,20 +97,20 @@ const ChatArea = () => {
             </div>
           </div>
         ) : (
-          <div className="max-w-3xl mx-auto space-y-6">
+          <div className="max-w-3xl mx-auto space-y-4 p-16">
             {messages.map((message) => (
               <div
                 key={message._id}
                 className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[80%] rounded-2xl px-5 py-3 ${
+                  className={`max-w-[80%] rounded-2xl px-5 py-3 break-words whitespace-pre-wrap ${
                     message.role === 'user'
                       ? 'bg-blue-600 text-white'
                       : 'bg-gray-100 text-gray-800'
                   }`}
                 >
-                  <p className="whitespace-pre-wrap break-words">{message.content}</p>
+                  {message.content}
                 </div>
               </div>
             ))}
@@ -118,40 +119,36 @@ const ChatArea = () => {
         )}
       </div>
 
-      <div className="border-t border-gray-200 p-4 bg-white">
-        <div className="max-w-3xl mx-auto">
-          <div className="flex items-end space-x-3">
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyPress}
-              placeholder={user && user.credits < 10 ? 'Insufficient credits' : 'Type your message...'}
-              disabled={sending || (!!user && user.credits < 10)}
-              className="flex-1 resize-none border border-gray-300 rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-              rows={1}
-              style={{
-                minHeight: '48px',
-                maxHeight: '120px'
-              }}
-            />
-            <button
-              onClick={handleSend}
-              disabled={!input.trim() || sending || (!!user && user.credits < 10)}
-              className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-2xl transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-            >
-              {sending ? (
-                <Loader className="w-5 h-5 animate-spin" />
-              ) : (
-                <Send className="w-5 h-5" />
-              )}
-            </button>
-          </div>
-          {user && user.credits < 10 && (
-            <p className="text-red-600 text-sm mt-2">
-              You need at least 10 credits to send a message
-            </p>
-          )}
+      {/* Fixed Input Area */}
+      <div className="w-full border-t border-gray-200 bg-white p-3 fixed bottom-0 left-0 z-10">
+        <div className="max-w-3xl mx-auto flex items-end gap-3">
+          <textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyPress}
+            placeholder={user && user.credits < 10 ? 'Insufficient credits' : 'Type your message...'}
+            disabled={sending || (!!user && user.credits < 10)}
+            className="flex-1 resize-none border border-gray-300 rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+            rows={1}
+            style={{ minHeight: '48px', maxHeight: '120px' }}
+          />
+          <button
+            onClick={handleSend}
+            disabled={!input.trim() || sending || (!!user && user.credits < 10)}
+            className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-2xl transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+          >
+            {sending ? (
+              <Loader className="w-5 h-5 animate-spin" />
+            ) : (
+              <Send className="w-5 h-5" />
+            )}
+          </button>
         </div>
+        {user && user.credits < 10 && (
+          <p className="text-red-600 text-sm mt-2 text-center">
+            You need at least 10 credits to send a message
+          </p>
+        )}
       </div>
     </div>
   );
