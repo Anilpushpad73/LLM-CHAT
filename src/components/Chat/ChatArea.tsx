@@ -1,13 +1,18 @@
 import { useState, useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store/store';
-import { Send, Loader } from 'lucide-react';
+import { Send, Loader, Copy } from 'lucide-react';
 import api from '../../services/api';
 import { addMessage, setSending, updateChatTitle } from '../../store/slices/chatSlice';
 import { updateCredits } from '../../store/slices/authSlice';
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeHighlight from "rehype-highlight";
+import "highlight.js/styles/github.css"; 
 
 const ChatArea = () => {
   const [input, setInput] = useState('');
+  const [copiedId, setCopiedId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const dispatch = useDispatch();
 
@@ -63,6 +68,16 @@ const ChatArea = () => {
     }
   };
 
+  const handleCopy = async (id: string, text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch (err) {
+      console.error('Failed to copy text:', err);
+    }
+  };
+
   if (!currentChatId) {
     return (
       <div className="flex-1 flex items-center justify-center bg-white">
@@ -97,20 +112,67 @@ const ChatArea = () => {
             </div>
           </div>
         ) : (
-          <div className="max-w-3xl mx-auto space-y-4 p-16">
+          <div className="max-w-4xl mx-auto space-y-4 py-16 px-4 sm:p-16">
             {messages.map((message) => (
               <div
                 key={message._id}
-                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[80%] rounded-2xl px-5 py-3 break-words whitespace-pre-wrap ${
-                    message.role === 'user'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-800'
+                  className={`relative max-w-[80%] rounded-2xl px-5 py-2 break-words ${
+                    message.role === "user"
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-100 text-gray-800"
                   }`}
                 >
-                  {message.content}
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    rehypePlugins={[rehypeHighlight]}
+                    components={{
+                      h1: ({ node, ...props }) => <h1 className="text-2xl font-bold my-2" {...props} />,
+                      h2: ({ node, ...props }) => <h2 className="text-xl font-semibold my-2" {...props} />,
+                      p: ({ node, ...props }) => <p className="my-2 leading-relaxed" {...props} />,
+                      li: ({ node, ...props }) => <li className="ml-4 list-disc" {...props} />,
+                      code: ({
+                        inline,
+                        className,
+                        children,
+                        ...props
+                      }: {
+                        inline?: boolean;
+                        className?: string;
+                        children?: React.ReactNode;
+                      }) => (
+                        <code
+                          className={`rounded px-1 py-0.5 text-sm font-mono ${
+                            inline
+                              ? "bg-gray-200 text-gray-800"
+                              : "block bg-gray-900 text-white p-2 rounded-md"
+                          }`}
+                          {...props}
+                        >
+                          {children}
+                        </code>
+                      ),
+                    }}
+                  >
+                    {message.content}
+                  </ReactMarkdown>
+
+                  {/* Copy button for assistant messages */}
+                  {message.role !== 'user' && (
+                    <button
+                      onClick={() => handleCopy(message._id, message.content)}
+                      className="absolute top-2 right-2 p-1.5 rounded-md bg-gray-200 hover:bg-gray-300 transition"
+                      title="Copy message"
+                    >
+                      {copiedId === message._id ? (
+                        <span className="text-xs text-green-600 font-medium">Copied!</span>
+                      ) : (
+                        <Copy className="w-4 h-4 text-gray-600" />
+                      )}
+                    </button>
+                  )}
                 </div>
               </div>
             ))}

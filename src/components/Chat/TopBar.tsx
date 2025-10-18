@@ -32,21 +32,33 @@ const TopBar = ({
 
   return (
     <header
-      className={`fixed top-0 z-50 h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 sm:px-6 transition-all duration-300 ease-in-out
-      ${isSidebarOpen ? "sm:left-64 sm:right-0 sm:w-[calc(100%-16rem)]" : "left-0 right-0 w-full"}`}
+      className={`fixed top-0 z-30 sm:z-50 h-16 bg-slate-900 border-b border-gray-200 flex items-center justify-between px-4 sm:px-6 transition-all duration-300 ease-in-out
+      ${isSidebarOpen ? "w-full sm:left-64 sm:right-0 sm:w-[calc(100%-16rem)]" : "left-0 right-0 w-full"}`}
     >
       {/* Left Section */}
       <div className="flex items-center space-x-4">
+        {/* Menu Button */}
         <button
           onClick={onToggleSidebar}
-          className="p-2 hover:bg-gray-100 rounded-lg transition"
+          className={`
+            p-2 hover:bg-gray-500 rounded-lg transition
+            ${isSidebarOpen ? 'sm:ml-0 ml-64' : ''}
+          `}
         >
-          <Menu className="w-6 h-6 text-gray-700" />
+          <Menu className="w-6 h-6 text-gray-200" />
         </button>
-        <h1 className="text-lg sm:text-xl font-bold text-gray-800 whitespace-nowrap">
+
+        {/* Title */}
+        <h1
+          className={`
+            text-lg sm:text-xl font-bold text-gray-200 whitespace-nowrap ml-2
+            ${isSidebarOpen ? 'hidden sm:block' : 'block'}
+          `}
+        >
           AI Chat Platform
         </h1>
       </div>
+
 
       {/* ---------- Desktop & Tablet View ---------- */}
       <div className="hidden sm:flex items-center space-x-3 sm:space-x-5">
@@ -61,9 +73,9 @@ const TopBar = ({
         {/* Notifications */}
         <button
           onClick={onToggleNotifications}
-          className="relative p-2 hover:bg-gray-100 rounded-lg transition"
+          className="relative p-2 hover:bg-gray-500 rounded-lg transition"
         >
-          <Bell className="w-5 h-5 text-gray-700" />
+          <Bell className="w-5 h-5 text-gray-200" />
           {unreadCount > 0 && (
             <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
               {unreadCount > 9 ? "9+" : unreadCount}
@@ -72,12 +84,12 @@ const TopBar = ({
         </button>
 
         {/* User Info */}
-        <div className="flex items-center gap-3 bg-white px-3 py-2 rounded-xl shadow-sm border border-gray-200">
+        <div className="flex items-center gap-3 bg-gray-800 px-3 py-2 rounded-xl shadow-sm border border-gray-200">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-blue-500 flex items-center justify-center text-white font-semibold text-lg">
             {user?.username?.charAt(0).toUpperCase() || "G"}
           </div>
 
-          <span className="hidden md:inline text-gray-800 font-semibold text-sm">
+          <span className="hidden md:inline text-gray-200 font-semibold text-sm">
             {user?.username || "Guest"}
           </span>
 
@@ -92,7 +104,7 @@ const TopBar = ({
       </div>
 
       {/* ---------- Mobile Dropdown Menu ---------- */}
-      <div className="flex sm:hidden items-center space-x-3 relative">
+      <div className="flex sm:hidden items-stretch space-x-3 relative">
         {/* Avatar Dropdown Button */}
         <button
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
