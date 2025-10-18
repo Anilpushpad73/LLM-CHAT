@@ -1,7 +1,7 @@
-
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store/store';
-import { Plus, MessageSquare, Trash2, Building2, Pen } from 'lucide-react';
+import { Plus, MessageSquare, Trash2, Building2, Pen, Search } from 'lucide-react';
+import { useState } from 'react';
 import api from '../../services/api';
 import { addChat, setCurrentChat, removeChat, setMessages, updateChatTitle } from '../../store/slices/chatSlice';
 
@@ -16,6 +16,8 @@ const Sidebar = ({ isOpen, onOpenOrgModal }: SidebarProps) => {
   const chats = useSelector((state: RootState) => state.chat.chats);
   const currentChatId = useSelector((state: RootState) => state.chat.currentChatId);
   const currentOrg = useSelector((state: RootState) => state.organization.currentOrganization);
+
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleNewChat = async () => {
     try {
@@ -37,19 +39,20 @@ const Sidebar = ({ isOpen, onOpenOrgModal }: SidebarProps) => {
       console.error('Error loading messages:', error);
     }
   };
-    const handlechangetitle = async (chatId: string, e: React.MouseEvent) => {
-      e.stopPropagation(); 
-      const newTitle = prompt("Enter new chat title:");
-      if (!newTitle || newTitle.trim() === "") return;
 
-      try {
-        const response = await api.put(`/chat/${chatId}/title`, { title: newTitle });
-        dispatch(updateChatTitle({ chatId, title: newTitle }));
-        console.log("Chat title updated:", response.data);
-      } catch (error) {
-        console.error("Error updating chat title:", error);
-      }
-    };
+  const handlechangetitle = async (chatId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newTitle = prompt("Enter new chat title:");
+    if (!newTitle || newTitle.trim() === "") return;
+
+    try {
+      const response = await api.put(`/chat/${chatId}/title`, { title: newTitle });
+      dispatch(updateChatTitle({ chatId, title: newTitle }));
+      console.log("Chat title updated:", response.data);
+    } catch (error) {
+      console.error("Error updating chat title:", error);
+    }
+  };
 
   const handleDeleteChat = async (chatId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -62,6 +65,11 @@ const Sidebar = ({ isOpen, onOpenOrgModal }: SidebarProps) => {
       console.error('Error deleting chat:', error);
     }
   };
+
+  // Filter chats based on search input
+  const filteredChats = chats.filter((chat) =>
+    chat.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   if (!isOpen) return null;
 
@@ -77,16 +85,30 @@ const Sidebar = ({ isOpen, onOpenOrgModal }: SidebarProps) => {
         </button>
       </div>
 
+      {/* Search Bar */}
+      <div className="p-3 border-b border-slate-700 flex items-center gap-2">
+        <Search className="w-4 h-4 text-gray-400" />
+        <input
+          type="text"
+          placeholder="Search chats..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full bg-slate-800 text-white text-sm px-2 py-1 rounded-md focus:outline-none"
+        />
+      </div>
+
+      {/* Chat List */}
       <div className="flex-1 overflow-y-auto">
         <div className="p-3">
           <h3 className="text-xs font-semibold text-gray-400 uppercase mb-2 px-2">
             Recent Chats
           </h3>
-          {chats.length === 0 ? (
-            <p className="text-sm text-gray-500 px-2 py-4">No chats yet. Create one to start!</p>
+
+          {filteredChats.length === 0 ? (
+            <p className="text-sm text-gray-500 px-2 py-4">No matching chats found.</p>
           ) : (
             <div className="space-y-1">
-              {chats.map((chat) => (
+              {filteredChats.map((chat) => (
                 <div
                   key={chat._id}
                   onClick={() => handleSelectChat(chat._id)}
@@ -108,7 +130,7 @@ const Sidebar = ({ isOpen, onOpenOrgModal }: SidebarProps) => {
                     onClick={(e) => handlechangetitle(chat._id, e)}
                     className="p-2 hover:bg-gray-200 rounded"
                   >
-                    <Pen className="w-4 h-4" />
+                    <Pen className="w-4 h-4 text-black" />
                   </button>
                 </div>
               ))}
